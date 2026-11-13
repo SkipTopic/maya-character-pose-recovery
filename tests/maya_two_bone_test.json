@@ -1,0 +1,56 @@
+{
+ "ok": true,
+ "solver": "analytic_world_two_bone",
+ "start": "|TMP_POSE_RECOVERY_TEST_GROUP|TMP_TEST_START",
+ "middle": "|TMP_POSE_RECOVERY_TEST_GROUP|TMP_TEST_START|TMP_TEST_MIDDLE",
+ "end": "|TMP_POSE_RECOVERY_TEST_GROUP|TMP_TEST_START|TMP_TEST_MIDDLE|TMP_TEST_END",
+ "bone_lengths": [
+  35.99999999999999,
+  48.0
+ ],
+ "requested_target": [
+  26.24705812890601,
+  -1.7988316711621835,
+  27.073038722640877
+ ],
+ "effective_target": [
+  26.24705812890601,
+  -1.7988316711621906,
+  27.07303872264088
+ ],
+ "middle_target": [
+  32.95976740990126,
+  40.67548425932658,
+  48.40076763000157
+ ],
+ "actual_end": [
+  26.247058128906005,
+  -1.7988316711621835,
+  27.0730387226409
+ ],
+ "actual_middle": [
+  32.95976740990125,
+  40.67548425932658,
+  48.40076763000157
+ ],
+ "error": 1.9459014222361976e-14,
+ "target_was_clamped": false,
+ "rotations": {
+  "TMP_TEST_START": [
+   -2.535092345271005,
+   -11.144960189660013,
+   0.24737866601303227
+  ],
+  "TMP_TEST_MIDDLE": [
+   6.899876620234829,
+   -0.8903953769657035,
+   14.688917424877028
+  ],
+  "TMP_TEST_END": [
+   -4.47921437438277,
+   10.202704910701126,
+   -15.79600570056095
+  ]
+ },
+ "temporary_rotation_helpers_left": []
+}
