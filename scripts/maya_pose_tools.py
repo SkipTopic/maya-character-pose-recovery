@@ -43,6 +43,9 @@ def _is_descendant(node, ancestor):
 
 
 def _assert_writable_rotation(node):
+    locked = [axis for axis in ("X", "Y", "Z") if cmds.getAttr(node + ".rotate" + axis, lock=True)]
+    if locked:
+        raise RuntimeError("Rotation channels are locked; unlock intentionally before solving: %s %s" % (node, locked))
     incoming = cmds.listConnections(node + ".rotate", s=True, d=False) or []
     if incoming:
         raise RuntimeError("Rotation has incoming connections; bake or intentionally remove them first: %s -> %s" % (node, incoming))
@@ -115,6 +118,9 @@ def solve_two_bone_world(start, middle, end, target, pole, iterations=3,
         raise ValueError("start, middle and end must be different joints")
     if not _is_descendant(middle, start) or not _is_descendant(end, middle):
         raise ValueError("Expected start -> ... -> middle -> ... -> end hierarchy")
+    # Fail before changing any joint if any channel is locked or driven.
+    for node in (start, middle, end):
+        _assert_writable_rotation(node)
 
     source = om.MVector(*world_position(start))
     requested = om.MVector(*target)
@@ -151,35 +157,44 @@ def solve_two_bone_world(start, middle, end, target, pole, iterations=3,
     effective = [effective_target.x, effective_target.y, effective_target.z]
     end_rest_rotation = world_rotation(end)
 
-    for _ in range(max(1, int(iterations))):
-        align_world_bone(start, middle, middle_target)
-        align_world_bone(middle, end, effective)
+    cmds.undoInfo(openChunk=True, chunkName="maya_character_pose_recovery")
+    try:
+        for _ in range(max(1, int(iterations))):
+            align_world_bone(start, middle, middle_target)
+            align_world_bone(middle, end, effective)
 
-    if preserve_end_rotation:
-        _apply_world_rotation(end, end_rest_rotation)
+        if preserve_end_rotation:
+            _apply_world_rotation(end, end_rest_rotation)
 
-    got = world_position(end)
-    error = distance(effective, got)
-    result = {
-        "solver": "analytic_world_two_bone",
-        "start": _long(start),
-        "middle": _long(middle),
-        "end": _long(end),
-        "bone_lengths": [l1, l2],
-        "requested_target": list(requested),
-        "effective_target": effective,
-        "middle_target": middle_target,
-        "actual_end": got,
-        "actual_middle": world_position(middle),
-        "error": error,
-        "target_was_clamped": abs(raw_distance - solved_distance) > 0.000001,
-        "rotations": {
-            node: list(cmds.getAttr(node + ".rotate")[0])
-            for node in (start, middle, end)
-        },
-    }
-    if raise_on_error and error > tolerance:
-        raise RuntimeError("Two-bone result missed target: %.6f > %.6f; %s" % (error, tolerance, result))
+        got = world_position(end)
+        error = distance(effective, got)
+        result = {
+            "solver": "analytic_world_two_bone",
+            "start": _long(start),
+            "middle": _long(middle),
+            "end": _long(end),
+            "bone_lengths": [l1, l2],
+            "requested_target": list(requested),
+            "effective_target": effective,
+            "middle_target": middle_target,
+            "actual_end": got,
+            "actual_middle": world_position(middle),
+            "error": error,
+            "target_was_clamped": abs(raw_distance - solved_distance) > 0.000001,
+            "rotations": {
+                node: list(cmds.getAttr(node + ".rotate")[0])
+                for node in (start, middle, end)
+            },
+        }
+        if raise_on_error and error > tolerance:
+            raise RuntimeError("Two-bone result missed target: %.6f > %.6f; %s" % (error, tolerance, result))
+    except Exception:
+        cmds.undoInfo(closeChunk=True)
+        cmds.undo()
+        cmds.refresh(force=True)
+        raise
+    else:
+        cmds.undoInfo(closeChunk=True)
     return result
 
 
@@ -264,6 +279,8 @@ def scene_integrity():
         "blend_shapes": cmds.ls(type="blendShape") or [],
         "animation_curves": cmds.ls(type="animCurve") or [],
         "ik_handles": cmds.ls(type="ikHandle") or [],
+        "constraints": cmds.ls(type="constraint") or [],
+        "sdef_named_nodes": [n for n in (cmds.ls(dag=True, long=True) or []) if "sdef" in n.lower()],
         "delta_mush": cmds.ls(type="deltaMush") or [],
         "camera_shapes": cameras,
     }

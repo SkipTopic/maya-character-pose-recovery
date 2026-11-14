@@ -150,12 +150,14 @@ Shiye_四视图.png
 ## 8. 案例证据位置
 
 ```text
-C:\Users\admin\Desktop\MayaProject\让子弹飞分镜测试\工作区域文件夹\scenes\摆姿重建_v7.mb
-C:\Users\admin\Desktop\MayaProject\让子弹飞分镜测试\工作区域文件夹\_摆姿验收\v7
-C:\Users\admin\Desktop\MayaProject\让子弹飞分镜测试\工作区域文件夹\logs\q3_rebuild_pose_v7.json
-C:\Users\admin\Desktop\MayaProject\让子弹飞分镜测试\工作区域文件夹\logs\ds0_scene_snapshot.json
-C:\Users\admin\Desktop\MayaProject\让子弹飞分镜测试\交接文档_给DeepSeek_摄像机与人物动作.md
+<项目>\工作区域文件夹\scenes\摆姿重建_v7.mb
+<项目>\工作区域文件夹\_摆姿验收\v7
+<项目>\工作区域文件夹\logs\q3_rebuild_pose_v7.json
+<项目>\工作区域文件夹\logs\ds0_scene_snapshot.json
+<项目>\交接文档_给DeepSeek_摄像机与人物动作.md
 ```
+
+这些相对位置用于说明案例证据结构；公开仓库不包含用户的本地项目目录。
 
 ## 9. 可泛化与不可泛化
 

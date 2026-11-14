@@ -48,6 +48,10 @@ def inspect_scene(joints=None, output_path=None):
     """Return a scene report and optionally write UTF-8 JSON to output_path."""
     report = scene_integrity()
     report["maya_version"] = cmds.about(version=True)
+    report["file_texture_paths"] = [
+        {"node": node, "path": cmds.getAttr(node + ".fileTextureName")}
+        for node in report.get("file_texture_nodes", [])
+    ]
     report["playback"] = {
         "min": cmds.playbackOptions(q=True, min=True),
         "max": cmds.playbackOptions(q=True, max=True),

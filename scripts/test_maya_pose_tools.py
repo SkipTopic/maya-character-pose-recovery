@@ -12,7 +12,8 @@ from maya_pose_tools import solve_two_bone_world, world_position
 
 def run_test(output_path=None):
     group = None
-    report = {"ok": False}
+    previous_selection = cmds.ls(selection=True, long=True) or []
+    report = {"ok": False, "maya_version": cmds.about(version=True), "scene": cmds.file(q=True, sceneName=True)}
     try:
         before_rot_helpers = set(cmds.ls("TMP_POSE_RECOVERY_ROT*", long=True) or [])
         group = cmds.group(empty=True, name="TMP_POSE_RECOVERY_TEST_GROUP")
@@ -44,9 +45,24 @@ def run_test(output_path=None):
             preserve_end_rotation=True,
         )
         after_rot_helpers = set(cmds.ls("TMP_POSE_RECOVERY_ROT*", long=True) or [])
+
+        locked_channel_rejected = False
+        start_before_rejected = list(cmds.getAttr(start + ".rotate")[0])
+        cmds.setAttr(middle + ".rotateX", lock=True)
+        try:
+            try:
+                solve_two_bone_world(start, middle, end, target, pole, raise_on_error=True)
+            except RuntimeError:
+                locked_channel_rejected = True
+        finally:
+            cmds.setAttr(middle + ".rotateX", lock=False)
+        start_after_rejected = list(cmds.getAttr(start + ".rotate")[0])
+        locked_channel_rejected = locked_channel_rejected and start_before_rejected == start_after_rejected
+
         report.update(result)
+        report["locked_channel_preflight_rejected_without_changes"] = locked_channel_rejected
         report["temporary_rotation_helpers_left"] = sorted(after_rot_helpers - before_rot_helpers)
-        report["ok"] = result["error"] <= 0.05 and not report["temporary_rotation_helpers_left"]
+        report["ok"] = result["error"] <= 0.05 and locked_channel_rejected and not report["temporary_rotation_helpers_left"]
         if not report["ok"]:
             raise RuntimeError("Two-bone smoke test failed: %s" % report)
     except Exception as exc:
@@ -54,7 +70,11 @@ def run_test(output_path=None):
     finally:
         if group and cmds.objExists(group):
             cmds.delete(group)
-        cmds.select(clear=True)
+        existing_selection = [node for node in previous_selection if cmds.objExists(node)]
+        if existing_selection:
+            cmds.select(existing_selection, replace=True)
+        else:
+            cmds.select(clear=True)
         cmds.refresh(force=True)
 
     if output_path:
@@ -66,5 +86,13 @@ def run_test(output_path=None):
     return report
 
 
-if __name__ == "__maya_cmd__":
-    run_test()
+def main(output_path=None):
+    result = run_test(output_path=output_path)
+    print(json.dumps({"ok": result.get("ok"), "report": output_path}, ensure_ascii=False))
+    if not result.get("ok"):
+        raise RuntimeError("Maya pose recovery smoke test failed; inspect %s" % output_path)
+    return result
+
+
+if __name__ in ("__main__", "__maya_cmd__"):
+    main()

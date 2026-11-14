@@ -114,12 +114,13 @@ delta = om.MQuaternion(current_unit_vector, desired_unit_vector)
 ```python
 from maya_pose_tools import solve_two_bone_world
 
+# measured_target / measured_pole 必须由当前项目重新测量，不使用案例坐标。
 leg = solve_two_bone_world(
     start="Bip001LThigh",
     middle="Bip001LCalf",
     end="Bip001LFoot",
-    target=[6.78, 10.10, -67.28],
-    pole=[6.78, 62.00, -35.00],
+    target=measured_target,
+    pole=measured_pole,
     preserve_end_rotation=True,
     tolerance=0.01,
     raise_on_error=True,

@@ -1,5 +1,7 @@
 {
  "ok": true,
+ "maya_version": "2024",
+ "scene": "",
  "solver": "analytic_world_two_bone",
  "start": "|TMP_POSE_RECOVERY_TEST_GROUP|TMP_TEST_START",
  "middle": "|TMP_POSE_RECOVERY_TEST_GROUP|TMP_TEST_START|TMP_TEST_MIDDLE",
@@ -52,5 +54,6 @@
    -15.79600570056095
   ]
  },
+ "locked_channel_preflight_rejected_without_changes": true,
  "temporary_rotation_helpers_left": []
 }

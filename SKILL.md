@@ -6,6 +6,8 @@ agent_created: true
 
 # Maya 人物模型姿态修复与安全动画
 
+> 中英文完整指南、真实故障目录和跨 AI 运行步骤见 [README.md](README.md)。 / Read the bilingual guide and failure catalog in [README.md](README.md).
+
 ## 目标
 
 将“人物扭曲、坐姿异常、手臂破裂、骨骼目标不命中、动画后模型炸开”的问题拆成可验证的步骤，避免用固定欧拉角、网格硬搬、Delta Mush 或随机运镜掩盖根因。
@@ -61,12 +63,14 @@ agent_created: true
 ```python
 from maya_pose_tools import solve_two_bone_world
 
+# 先根据当前项目的参考、骨长和接触面计算 measured_target / measured_pole。
+# 不要复制案例坐标。
 result = solve_two_bone_world(
     start="Bip001LThigh",
     middle="Bip001LCalf",
     end="Bip001LFoot",
-    target=[6.78, 10.10, -67.28],
-    pole=[6.78, 62.00, -35.00],
+    target=measured_target,
+    pole=measured_pole,
     preserve_end_rotation=True,
     tolerance=0.01,
     raise_on_error=True,
